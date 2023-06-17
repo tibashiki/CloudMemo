@@ -1,0 +1,1 @@
+plain ordinary Java object 简单无规则 java 对象。

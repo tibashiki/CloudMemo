@@ -1,0 +1,74 @@
+用户行为actionName
+进入发布云记页面actionName = view
+添加或修改云记actionName = addOrUpdate
+查询云记详情actionName=detail
+删除云记actionName=delete
+分页查询云记列表
+一，进入发布云记页面action = view
+    前台：
+        设置头部导航栏的发布云记超链接的href属性
+        href="note?actionName=view"
+    后台：
+        从session对象中获取User
+        通过userId查询对应的tb_note_type表里的属性
+        将NoteType设置到request请求域中（只需要在一次请求中生效）
+        设置首页动态包含的页面值
+        请求转发跳转到index.jsp
+三，发布云记
+    前台：
+        表单提交
+            设置表单的提交方式和提交地址
+            在隐藏域中设置用户行为actionName
+            设置表单元素的id,name属性值
+        表单校验
+            获取表单元素的值
+                获取下拉框选中的选项.val
+                获取文本的值.val
+                获取富文本ue.getContent()
+            非空判断
+                空，提示用户  return false
+                非空,提交表单 return true
+
+    后台：
+    Web:
+        接收参数（typeId,title,content）
+        调用Service层方法，返回ResultInfo对象
+        判断resultInfo的code值
+            如果code=1，成功
+                重定向跳转到页面index
+            code=0,失败
+                将resultInfo对象设置到req作用域
+                请求转发跳转到note?actionName=view
+    Service层
+        设置回显对象Note
+        非空校验
+            空，code=0，msg=...,result=note(把原来的数据回显)返回resultInfo
+        非空，调用Dao层，添加云记，返回受影响的行数
+        判断受影响行数
+            大于0，code=1
+            0，code=0,msg=...,result=note(把原来的数据回显)
+    Dao层
+        添加云记，返回受影响的行数
+
+四，分页查询云记列表
+    后台
+    web层
+        接收参数（当前页，每页显示的数量）
+        获取Session作用域中的user
+        调用Service层的查询方法，返回Page对象(通过userId查询对应的表里的属性)
+        将page对象设置到req作用域
+        设置首页动态包含的页面值
+        请求转发跳转到index.jsp
+    Service层
+        参数的非空校验
+            如果分页为空，设置默认值
+        查询当前登录用户的云集数量，返回总记录数（long类型）
+        判断总记录数是否大于0
+        大于0，调用Page类的代餐构造，得到page的其他参数，并返回Page
+        查询该用户当前页面下的数据列表，返回note集合
+        将note集合设置到page对象中
+        返回Page
+
+    Dao层
+         查询当前登录用户的云集数量，返回总记录数(实现)
+         查询该用户当前页面下的数据列表，返回note集合(实现)

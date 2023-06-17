@@ -1,0 +1,90 @@
+用户模块
+    用户行为 actionName
+        用户登录 ="login"
+        个人中心 ="userCenter"
+        加载头像 ="icon"
+        验证昵称 ="checkNick"
+        修改信息 ="updateInfo"
+        用户退出 ="logout"
+    在UserServlet的service方法中
+        1获取用户行为(通过字符串接收getPara)
+            String actionName = req.getParameter("actionName");
+        2判断，调用对应方法
+            if("xxx".equals(actionName)){
+                do.xxx;
+            }
+
+1用户登录
+    ===================前端实现===================
+        1添加表单，设置表单属性
+            action="user" method="post" id="loginForm"
+        2设置表单元素的属性值，修改id属性值
+            设置文本框密码框的name属性值
+            设置复选框的name属性值和value属性值（如果复选框未选中，无法获得value）
+            设置隐域，用来传递用户行为name="actionName" value="login"
+        3在config.js文件中，声明函数function checklogin() 按钮的点击事件绑定 按钮onclick="checkLogin()"
+            表单校验
+                获取表单元素的值（姓名，密码）
+                判断是否为空（在util.js文件中，写isEmpty作为判断函数，后导入utils）
+                为空：通过<span>设置提示信息（span行内元素），return、非空：提交表单
+    ===================后端实现===================
+        1获取参数getPara（姓名，密码）
+        2参数非空校验 （准备封装类ResultInfo，封装响应结果：状态码、提示信息、返回对象）
+            为空：错误{设置ResultInfo对象的状态码和提示信息
+                 将ResultInfo对象，设置到，request作用域中
+                 请求转发跳转dispatcher.forward到登录页面}
+                 return
+            非空：与数据库内数据进行匹配
+                 通过用户名查询用户对象
+                    为空：错误{设置ResultInfo对象的状态码和提示信息
+                         将ResultInfo对象，设置到，request作用域中
+                         求转发跳转到登录页面}
+                    非空：匹配密码和数据库中用户的密码（密码会加密）
+                         密码不正确：错误{设置ResultInfo对象的状态码和提示信息
+                                   将ResultInfo对象，设置到，request作用域中
+                                   求转发跳转到登录页面}
+                         密码正确：将用户信息存到session作用域中
+                            判断用户是否选择记住密码（rem=1）
+                                记住：将用户与密码存入cookie，设置失效时间，并相应给客户端
+                                不记住：清空用户cookie
+                            重定向redirect到index
+
+
+分层思想：
+    Web层：接收参数，响应数据
+        1,获取参数getPara(姓名，密码)
+        2，调用Service层的方法，返回ResultInfo对象
+        3，如果判断成功
+            如果失败
+                将resultInfo设置到req中
+                请求转发跳转到登录页面
+                req.getRequestDispather("/login")dispatcher.forward(req.resp)
+            如果成功
+                判断用户是否选择记住登陆状态（rem=1）
+                    如果是：将用户与密码存到Cookie中，设置失效时间，并响应给客户端
+                    如果否：清空Cookie
+                重定向redirect到index
+
+    Service层：业务逻辑（参数判断，业务处理）
+        1，判断参数是否为空
+            为空：错误{设置ResultInfo对象的状态码和提示信息
+                     将ResultInfo对象，设置到，request作用域中}
+            2，非空：通过用户名查询用户对象
+                 3，用户对象是否为空
+                    为空：错误{设置ResultInfo对象的状态码和提示信息
+                             将ResultInfo对象，设置到，request作用域中}
+                    4非空：判断密码是否正确
+                        不正确：
+                            错误{设置ResultInfo对象的状态码和提示信息
+                                将ResultInfo对象，设置到，request作用域中}
+                        5，正确：设置ResultInfo对象的状态码和提示信息
+        6返回ResultInfo对象
+    DAO层：数据访问层 数据的增删改查
+        通过用户名查询用户对象，返回用户对象
+            1获取数据库链接
+            2定义sql语句
+            3预编译
+            4设置参数
+            5执行查询
+            6判断并分析结果
+            7关闭资源

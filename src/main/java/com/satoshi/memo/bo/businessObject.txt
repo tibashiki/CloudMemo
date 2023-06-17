@@ -1,0 +1,2 @@
+business object 业务对象，封装业务逻辑的 java 对象。
+通过调用 DAO 方法，结合 PO，VO 进行业务操作。
